@@ -1,4 +1,4 @@
-{pkgs ? import <nixpkgs> {}, name, src, doCheck ? false } :
+{pkgs ? import <nixpkgs> {}, name, src, executable, doCheck ? false } :
 let
   bowerDeps = pkgs.callPackage ./callBower2nix.nix {
     inherit name;
@@ -36,7 +36,9 @@ in
         done
       done
     '';
-    buildPhase = ''
+    buildPhase = if executable then ''
+      pulp browserify --optimise --to "$out"/"$name".js
+    '' else ''
       pulp build --build-path "$out"
     '';
     checkPhase = ''
