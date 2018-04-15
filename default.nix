@@ -1,5 +1,5 @@
 {
-  pinnedPkgs = import ./pinned-pkgs.nix;
+  pinnedPkgs = import ./pinnedPkgs.nix;
   callBower2nix = import ./callBower2nix.nix;
   callNode2nix = import ./callNode2nix.nix;
   callNpm = import ./callNpm.nix;
