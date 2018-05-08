@@ -1,12 +1,13 @@
-{pkgs ? import <nixpkgs> {}, name, src, executable, doCheck ? false } :
+# TODO: Infer `npm` from `package.json`. Doesn't work ATM due to error about string "cannot refer to other paths" when using `builtins.pathExists`.
+{pkgs ? import <nixpkgs> {}, name, src, executable, npm ? false, doCheck ? false } :
 let
   bowerDeps = pkgs.callPackage ./callBower2nix.nix {
     inherit name;
-    src = "${src}/bower.json";
+    src = src + "/bower.json";
   };
   npmDeps = pkgs.callPackage ./callNode2nix.nix {
     inherit name;
-    src = "${src}/package.json";
+    src = src + "/package.json";
   };
 in
   pkgs.stdenv.mkDerivation {
@@ -15,11 +16,13 @@ in
     setSourceRoot = ''
       sourceRoot=$(pwd)
     '';
-    srcs = [ "${src}/src" "${src}/test" "${src}/bower.json" ];
+    srcs = [ (src + "/src") (src + "/test") (src + "/bower.json") ];
     nativeBuildInputs = [
       pkgs.nodePackages.pulp
       pkgs.purescript
-    ] ++ pkgs.stdenv.lib.optionals doCheck [npmDeps.shell.nodeDependencies pkgs.nodejs];
+    ] ++
+    pkgs.stdenv.lib.optionals npm [npmDeps.shell.nodeDependencies] ++
+    pkgs.stdenv.lib.optionals doCheck [pkgs.nodejs];
     phases = [ "unpackPhase" "configurePhase" "buildPhase" "checkPhase" "fixupPhase" ];
     preUnpack = ''
       unpackCmdHooks+=(_cpFile)
@@ -36,7 +39,10 @@ in
         done
       done
     '';
-    buildPhase = if executable then ''
+    buildPhase = if executable && npm then ''
+      export NODE_PATH=${npmDeps.shell.nodeDependencies}/lib/node_modules
+      pulp browserify --optimise --to "$out"/"$name".js
+    '' else if executable && !npm then ''
       pulp browserify --optimise --to "$out"/"$name".js
     '' else ''
       pulp build --build-path "$out"
