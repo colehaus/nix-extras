@@ -8,7 +8,7 @@
         [ { "${name}": "${versionSpec}" } ]
       '');
       buildPhase = ''
-        node2nix -6 --input node-packages.json
+        node2nix --nodejs-10 --input node-packages.json
       '';
       installPhase = ''
         mkdir -p "$out"

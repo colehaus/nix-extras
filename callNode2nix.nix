@@ -11,7 +11,7 @@
       buildPhase = ''
         TMP=$(mktemp -d)
         cd $TMP
-        node2nix --development -6 --input "$src"/package.json
+        node2nix --development --nodejs-10 --input "$src"/package.json
         ${postBuild}
       '';
       installPhase = ''
