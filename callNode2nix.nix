@@ -12,7 +12,7 @@
       buildPhase = ''
         TMP=$(mktemp -d)
         cd $TMP
-        node2nix --development --nodejs-10 --input ${packageJson}/package.json --lock ${packageLockJson}/package-lock.json
+        node2nix --development --nodejs-4 --input ${packageJson}/package.json --lock ${packageLockJson}/package-lock.json
         ${postBuild}
       '';
       installPhase = ''
