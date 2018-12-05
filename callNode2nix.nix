@@ -1,17 +1,18 @@
 # `postBuild` is a fairly hacky way of accommodating one-off fixes
-{ pkgs ? import <nixpkgs> {}, name, src, postBuild ? "" } :
+{ pkgs ? import <nixpkgs> {}, name, package, package-lock, postBuild ? "" } :
   let
-    packageJson = pkgs.writeTextDir "package.json" (builtins.readFile src);
+    packageJson = pkgs.writeTextDir "package.json" (builtins.readFile package);
+    packageLockJson = pkgs.writeTextDir "package-lock.json" (builtins.readFile package-lock);
     node2nix = pkgs.stdenv.mkDerivation {
       name = "node2nix-${name}";
       nativeBuildInputs = [ pkgs.nodePackages.node2nix pkgs.nix ];
       phases = [ "buildPhase" "installPhase" ];
-      src = packageJson;
+      srcs = [ packageJson packageLockJson ];
       # We need the temporary directory so that `node2nix`'s relative paths are correct
       buildPhase = ''
         TMP=$(mktemp -d)
         cd $TMP
-        node2nix --development --nodejs-10 --input "$src"/package.json
+        node2nix --development --nodejs-10 --input ${packageJson}/package.json --lock ${packageLockJson}/package-lock.json
         ${postBuild}
       '';
       installPhase = ''
