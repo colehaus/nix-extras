@@ -1,8 +1,8 @@
 # `postBuild` is a fairly hacky way of accommodating one-off fixes
-{ pkgs ? import <nixpkgs> {}, name, package, package-lock, postBuild ? "" } :
+{ pkgs ? import <nixpkgs> {}, name, package, packageLock, postBuild ? "" } :
   let
     packageJson = pkgs.writeTextDir "package.json" (builtins.readFile package);
-    packageLockJson = pkgs.writeTextDir "package-lock.json" (builtins.readFile package-lock);
+    packageLockJson = pkgs.writeTextDir "package-lock.json" (builtins.readFile packageLock);
     node2nix = pkgs.stdenv.mkDerivation {
       name = "node2nix-${name}";
       nativeBuildInputs = [ pkgs.nodePackages.node2nix pkgs.nix ];

@@ -7,7 +7,8 @@ let
   };
   npmDeps = pkgs.callPackage ./callNode2nix.nix {
     inherit name;
-    src = src + "/package.json";
+    package = src + "/package.json";
+    packageLock = src + "/package-lock.json";
   };
 in
   pkgs.stdenv.mkDerivation {
