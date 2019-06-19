@@ -17,10 +17,13 @@ in
     setSourceRoot = ''
       sourceRoot=$(pwd)
     '';
-    srcs = [ (src + "/src") (src + "/test") (src + "/bower.json") ];
+    srcs =
+      [ (src + "/src") (src + "/test") (src + "/bower.json") ] ++
+      pkgs.stdenv.lib.optionals npm [ (src + "/package.json") (src + "/package-lock.json") ] ;
     nativeBuildInputs = [
       pkgs.nodePackages.pulp
       pkgs.purescript
+      bowerDeps
     ] ++
     pkgs.stdenv.lib.optionals npm [npmDeps.shell.nodeDependencies] ++
     pkgs.stdenv.lib.optionals doCheck [pkgs.nodejs];
