@@ -1,15 +1,17 @@
 # TODO: Infer `npm` from `package.json`. Doesn't work ATM due to error about string "cannot refer to other paths" when using `builtins.pathExists`.
 {pkgs ? import <nixpkgs> {}, name, src, executable, npm ? false, doCheck ? false } :
 let
-  bowerDeps = pkgs.callPackage ./callBower2nix.nix {
+  bowerNix = pkgs.callPackage ./callBower2nix.nix {
     inherit name;
     src = src + "/bower.json";
   };
-  npmDeps = pkgs.callPackage ./callNode2nix.nix {
+  bowerDeps = pkgs.callPackage bowerNix {};
+  npmNix = pkgs.callPackage ./callNode2nix.nix {
     inherit name;
     package = src + "/package.json";
     packageLock = src + "/package-lock.json";
   };
+  npmDeps = pkgs.callPackage npmNix {};
 in
   pkgs.stdenv.mkDerivation {
     inherit name;
@@ -24,9 +26,10 @@ in
       pkgs.nodePackages.pulp
       pkgs.purescript
       bowerDeps
+      bowerNix
     ] ++
-    pkgs.stdenv.lib.optionals npm [npmDeps.shell.nodeDependencies] ++
-    pkgs.stdenv.lib.optionals doCheck [pkgs.nodejs];
+    pkgs.stdenv.lib.optionals npm [ npmDeps.shell.nodeDependencies npmNix ] ++
+    pkgs.stdenv.lib.optionals doCheck [ pkgs.nodejs ];
     phases = [ "unpackPhase" "configurePhase" "buildPhase" "checkPhase" "fixupPhase" ];
     preUnpack = ''
       unpackCmdHooks+=(_cpFile)

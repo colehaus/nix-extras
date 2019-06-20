@@ -3,7 +3,8 @@
   let
     packageJson = pkgs.writeTextDir "package.json" (builtins.readFile package);
     packageLockJson = pkgs.writeTextDir "package-lock.json" (builtins.readFile packageLock);
-    node2nix = pkgs.stdenv.mkDerivation {
+  in
+    pkgs.stdenv.mkDerivation {
       name = "node2nix-${name}";
       nativeBuildInputs = [ pkgs.nodePackages.node2nix pkgs.nix ];
       phases = [ "buildPhase" "installPhase" ];
@@ -19,6 +20,4 @@
         mkdir -p "$out"
         cp *.nix "$out"
       '';
-    };
-  in
-    pkgs.callPackage node2nix {}
+    }
